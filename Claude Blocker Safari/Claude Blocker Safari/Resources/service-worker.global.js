@@ -41,7 +41,7 @@
     try {
       if (typeof browser !== "undefined" && browser.runtime?.sendNativeMessage) {
         const response = await browser.runtime.sendNativeMessage(
-          "com.jackswitzer.Claude-Blocker-Safari.Extension",
+          "com.github.Claude-Blocker-Safari.Extension",
           { action: "getStatus" }
         );
         if (response && !response.error) {

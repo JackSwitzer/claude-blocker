@@ -63,7 +63,7 @@ async function fetchStatus(): Promise<void> {
     // Try native messaging first (Safari)
     if (typeof browser !== "undefined" && browser.runtime?.sendNativeMessage) {
       const response = await browser.runtime.sendNativeMessage(
-        "com.jackswitzer.Claude-Blocker-Safari.Extension",
+        "com.github.Claude-Blocker-Safari.Extension",
         { action: "getStatus" }
       );
 

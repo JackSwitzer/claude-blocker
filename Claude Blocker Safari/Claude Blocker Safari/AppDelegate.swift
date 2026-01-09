@@ -11,7 +11,10 @@ import Cocoa
 class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Override point for customization after application launch.
+        // Auto-close after 2 seconds - extension is already installed
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            NSApplication.shared.terminate(nil)
+        }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
