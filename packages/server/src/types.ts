@@ -21,9 +21,16 @@ export interface Session {
   cwd?: string;
 }
 
+// Session data sent to clients (serializable)
+export interface SessionData {
+  id: string;
+  status: "idle" | "working" | "waiting_for_input" | "waiting_for_review";
+  cwd?: string;
+}
+
 // WebSocket messages from server to extension
 export type ServerMessage =
-  | { type: "state"; blocked: boolean; sessions: number; working: number; waitingForInput: number; waitingForReview: number }
+  | { type: "state"; blocked: boolean; sessions: SessionData[]; working: number; waitingForInput: number; waitingForReview: number }
   | { type: "pong" };
 
 // WebSocket messages from extension to server

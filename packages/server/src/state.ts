@@ -34,10 +34,16 @@ class SessionState {
     const working = sessions.filter((s) => s.status === "working").length;
     const waitingForInput = sessions.filter((s) => s.status === "waiting_for_input").length;
     const waitingForReview = sessions.filter((s) => s.status === "waiting_for_review").length;
+    // Send session data (without lastActivity which isn't serializable)
+    const sessionData = sessions.map(s => ({
+      id: s.id,
+      status: s.status,
+      cwd: s.cwd,
+    }));
     return {
       type: "state",
       blocked: working === 0,
-      sessions: sessions.length,
+      sessions: sessionData,
       working,
       waitingForInput,
       waitingForReview,

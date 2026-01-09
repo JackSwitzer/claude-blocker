@@ -122,6 +122,56 @@ body {
   letter-spacing: 0.5px;
 }
 
+.attention-list {
+  display: none;
+  margin-bottom: 12px;
+}
+
+.attention-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #1c1c1e;
+  border-radius: 8px;
+  margin-bottom: 4px;
+}
+
+.attention-item:last-child {
+  margin-bottom: 0;
+}
+
+.attention-type {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.attention-item.asking .attention-type {
+  background: rgba(255, 214, 10, 0.2);
+  color: #ffd60a;
+}
+
+.attention-item.review .attention-type {
+  background: rgba(255, 149, 0, 0.2);
+  color: #ff9500;
+}
+
+.attention-project {
+  font-size: 12px;
+  font-weight: 500;
+  color: #ccc;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .settings-btn {
   display: flex;
   align-items: center;
