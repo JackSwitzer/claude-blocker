@@ -167,11 +167,11 @@ class SessionState {
         this.sessions.delete(id);
         removed++;
       }
-      // Auto-idle sessions that have been "working" for 30+ seconds without activity
-      else if (session.status === "working" && now - session.lastActivity.getTime() > 30_000) {
+      // Auto-idle sessions that have been "working" for 10+ seconds without activity
+      else if (session.status === "working" && now - session.lastActivity.getTime() > 10_000) {
         session.status = "idle";
         idled++;
-        console.log(`Auto-idled session ${id} (no activity for 30s)`);
+        console.log(`Auto-idled session ${id} (no activity for 10s)`);
       }
     }
 
