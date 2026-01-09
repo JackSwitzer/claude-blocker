@@ -159,15 +159,23 @@ class SessionState {
   private cleanupStaleSessions(): void {
     const now = Date.now();
     let removed = 0;
+    let idled = 0;
 
     for (const [id, session] of this.sessions) {
+      // Remove completely stale sessions (no activity for SESSION_TIMEOUT_MS)
       if (now - session.lastActivity.getTime() > SESSION_TIMEOUT_MS) {
         this.sessions.delete(id);
         removed++;
       }
+      // Auto-idle sessions that have been "working" for 30+ seconds without activity
+      else if (session.status === "working" && now - session.lastActivity.getTime() > 30_000) {
+        session.status = "idle";
+        idled++;
+        console.log(`Auto-idled session ${id} (no activity for 30s)`);
+      }
     }
 
-    if (removed > 0) {
+    if (removed > 0 || idled > 0) {
       this.broadcast();
     }
   }
