@@ -62,9 +62,16 @@
     const colors = {
       green: "background:#22c55e;box-shadow:0 0 8px #22c55e;",
       red: "background:#ef4444;box-shadow:0 0 8px #ef4444;",
+      yellow: "background:#ffd60a;box-shadow:0 0 8px #ffd60a;",
+      orange: "background:#ff9500;box-shadow:0 0 8px #ff9500;",
       gray: "background:#666;box-shadow:none;"
     };
     dot.style.cssText = `width:8px;height:8px;border-radius:50%;flex-shrink:0;${colors[color]}`;
+  }
+  function getProjectName(cwd) {
+    if (!cwd) return "Unknown";
+    const parts = cwd.split("/");
+    return parts[parts.length - 1] || "Unknown";
   }
   function renderStatus(state) {
     const shadow = getShadow();
@@ -83,11 +90,37 @@
     }
     const totalSessions = state.sessions.length;
     const workingSessions = state.working;
+    const askingSessions = state.sessions.filter((s) => s.status === "waiting_for_input");
+    const reviewSessions = state.sessions.filter((s) => s.status === "waiting_for_review");
+    const needsAttention = askingSessions.length > 0 || reviewSessions.length > 0;
     if (totalSessions === 0) {
       message.textContent = "No Claude sessions detected.";
       setDotColor(dot, "green");
       statusEl.textContent = "Waiting for Claude";
       hint.textContent = "Open a terminal and start Claude";
+    } else if (needsAttention) {
+      let html = "";
+      if (askingSessions.length > 0) {
+        html += `<div style="margin-bottom:${reviewSessions.length > 0 ? "12px" : "0"};">`;
+        html += `<div style="color:#ffd60a;font-weight:600;margin-bottom:8px;">Asking Questions:</div>`;
+        for (const s of askingSessions) {
+          html += `<div style="color:#fff;margin-left:8px;">\u2022 ${getProjectName(s.cwd)}</div>`;
+        }
+        html += `</div>`;
+      }
+      if (reviewSessions.length > 0) {
+        html += `<div>`;
+        html += `<div style="color:#ff9500;font-weight:600;margin-bottom:8px;">Awaiting Review:</div>`;
+        for (const s of reviewSessions) {
+          html += `<div style="color:#fff;margin-left:8px;">\u2022 ${getProjectName(s.cwd)}</div>`;
+        }
+        html += `</div>`;
+      }
+      message.innerHTML = html;
+      setDotColor(dot, askingSessions.length > 0 ? "yellow" : "orange");
+      const totalNeeding = askingSessions.length + reviewSessions.length;
+      statusEl.textContent = `${totalNeeding} need${totalNeeding === 1 ? "s" : ""} attention`;
+      hint.textContent = askingSessions.length > 0 ? "Answer questions in Claude to continue" : "Review Claude's work to continue";
     } else if (workingSessions === 0) {
       message.textContent = "All Claude sessions are idle.";
       setDotColor(dot, "green");
@@ -140,7 +173,22 @@
       handleStateUpdate(message);
     }
   });
-  function requestState() {
+  async function requestState() {
+    try {
+      const response = await fetch("http://localhost:8765/status");
+      if (response.ok) {
+        const data = await response.json();
+        const sessions = data.sessions || [];
+        handleStateUpdate({
+          serverConnected: true,
+          blocked: data.blocked,
+          working: sessions.filter((s) => s.status === "working").length,
+          sessions
+        });
+        return;
+      }
+    } catch {
+    }
     try {
       chrome.runtime.sendMessage({ type: "GET_STATE" }, (response) => {
         if (response) {
@@ -170,7 +218,7 @@
       setupMutationObserver();
       createModal();
       requestState();
-      setInterval(requestState, 3e3);
+      setInterval(requestState, 1e3);
     }
   }
   init();

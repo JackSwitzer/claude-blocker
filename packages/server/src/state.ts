@@ -40,9 +40,12 @@ class SessionState {
       status: s.status,
       cwd: s.cwd,
     }));
+    // Block if: no one working, OR any session needs attention (question/review)
+    const needsAttention = waitingForInput > 0 || waitingForReview > 0;
+    const blocked = working === 0 || needsAttention;
     return {
       type: "state",
-      blocked: working === 0,
+      blocked,
       sessions: sessionData,
       working,
       waitingForInput,
@@ -81,11 +84,19 @@ class SessionState {
       case "PreToolUse":
         this.ensureSession(session_id, payload.cwd);
         const toolSession = this.sessions.get(session_id)!;
-        // User input tools → waiting_for_input, all others → working
-        if (payload.tool_name && USER_INPUT_TOOLS.includes(payload.tool_name)) {
+        const isUserInputTool = payload.tool_name && USER_INPUT_TOOLS.includes(payload.tool_name);
+
+        // User input tools (questions) always take priority
+        if (isUserInputTool) {
           toolSession.status = "waiting_for_input";
           console.log(`[${session_id.slice(0,8)}] PreToolUse(${payload.tool_name}) → waiting_for_input`);
-        } else {
+        }
+        // Don't overwrite waiting_for_review with working - it's sticky
+        else if (toolSession.status === "waiting_for_review") {
+          console.log(`[${session_id.slice(0,8)}] PreToolUse(${payload.tool_name}) → keeping waiting_for_review`);
+        }
+        // All other tools → working
+        else {
           toolSession.status = "working";
           console.log(`[${session_id.slice(0,8)}] PreToolUse(${payload.tool_name}) → working`);
         }
@@ -95,6 +106,12 @@ class SessionState {
       case "Stop":
         this.ensureSession(session_id, payload.cwd);
         const idleSession = this.sessions.get(session_id)!;
+        // Don't clear waiting_for_review on Stop - only new prompt clears it
+        if (idleSession.status === "waiting_for_review") {
+          console.log(`[${session_id.slice(0,8)}] Stop → keeping waiting_for_review`);
+          idleSession.lastActivity = new Date();
+          break;
+        }
         idleSession.status = "idle";
         idleSession.lastActivity = new Date();
         console.log(`[${session_id.slice(0,8)}] Stop → idle`);
