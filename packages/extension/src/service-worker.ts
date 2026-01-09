@@ -45,9 +45,10 @@ function getPublicState() {
   };
 }
 
-// Broadcast current state to all tabs
+// Broadcast current state to all tabs and extension contexts (popup)
 function broadcast() {
   const publicState = getPublicState();
+  // Send to content scripts in tabs
   chrome.tabs.query({}, (tabs) => {
     for (const tab of tabs) {
       if (tab.id) {
@@ -55,6 +56,8 @@ function broadcast() {
       }
     }
   });
+  // Send to popup and other extension contexts
+  chrome.runtime.sendMessage({ type: "STATE", ...publicState }).catch(() => {});
 }
 
 // Fetch status through native messaging (Safari) or direct fetch (Chrome)

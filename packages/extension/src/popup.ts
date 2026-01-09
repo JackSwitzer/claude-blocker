@@ -101,4 +101,4 @@ chrome.runtime.onMessage.addListener((message) => {
 });
 
 refreshState();
-setInterval(refreshState, 5000);
+setInterval(refreshState, 2000);

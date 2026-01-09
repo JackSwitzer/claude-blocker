@@ -36,6 +36,8 @@
         }
       }
     });
+    chrome.runtime.sendMessage({ type: "STATE", ...publicState }).catch(() => {
+    });
   }
   async function fetchStatus() {
     try {

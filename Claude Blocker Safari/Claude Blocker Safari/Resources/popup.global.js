@@ -72,5 +72,5 @@
     }
   });
   refreshState();
-  setInterval(refreshState, 5e3);
+  setInterval(refreshState, 2e3);
 })();
