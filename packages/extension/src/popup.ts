@@ -82,7 +82,27 @@ function updateUI(state: PopupState): void {
   }
 }
 
-function refreshState(): void {
+async function refreshState(): Promise<void> {
+  // Try direct fetch first (more reliable in Safari)
+  try {
+    const response = await fetch("http://localhost:8765/status");
+    if (response.ok) {
+      const data = await response.json();
+      const sessions = data.sessions || [];
+      updateUI({
+        serverConnected: true,
+        sessions: sessions,
+        working: sessions.filter((s: Session) => s.status === "working").length,
+        blocked: data.blocked,
+        bypassActive: false,
+      });
+      return;
+    }
+  } catch {
+    // Direct fetch failed, try service worker
+  }
+
+  // Fallback to service worker
   chrome.runtime.sendMessage({ type: "GET_STATE" }, (state: PopupState) => {
     if (state) {
       updateUI(state);
@@ -101,4 +121,4 @@ chrome.runtime.onMessage.addListener((message) => {
 });
 
 refreshState();
-setInterval(refreshState, 2000);
+setInterval(refreshState, 1000); // Poll every 1s for fast updates

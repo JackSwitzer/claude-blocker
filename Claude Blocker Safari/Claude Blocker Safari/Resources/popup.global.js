@@ -56,7 +56,23 @@
       attentionList.innerHTML = html;
     }
   }
-  function refreshState() {
+  async function refreshState() {
+    try {
+      const response = await fetch("http://localhost:8765/status");
+      if (response.ok) {
+        const data = await response.json();
+        const sessions = data.sessions || [];
+        updateUI({
+          serverConnected: true,
+          sessions,
+          working: sessions.filter((s) => s.status === "working").length,
+          blocked: data.blocked,
+          bypassActive: false
+        });
+        return;
+      }
+    } catch {
+    }
     chrome.runtime.sendMessage({ type: "GET_STATE" }, (state) => {
       if (state) {
         updateUI(state);
@@ -72,5 +88,5 @@
     }
   });
   refreshState();
-  setInterval(refreshState, 2e3);
+  setInterval(refreshState, 1e3);
 })();
