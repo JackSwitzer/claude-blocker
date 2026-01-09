@@ -22,7 +22,7 @@ export function startServer(port: number = DEFAULT_PORT): void {
   const server = createServer(async (req, res) => {
     // CORS headers for local development
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
     if (req.method === "OPTIONS") {
@@ -39,6 +39,18 @@ export function startServer(port: number = DEFAULT_PORT): void {
       return;
     }
 
+    // Delete session endpoint
+    if (req.method === "DELETE" && url.pathname.startsWith("/session/")) {
+      const sessionId = url.pathname.slice("/session/".length);
+      if (!sessionId) {
+        sendJson(res, { error: "Session ID required" }, 400);
+        return;
+      }
+      const removed = state.removeSession(sessionId);
+      sendJson(res, { ok: true, removed });
+      return;
+    }
+
     // Hook endpoint - receives notifications from Claude Code
     if (req.method === "POST" && url.pathname === "/hook") {
       try {
@@ -52,6 +64,29 @@ export function startServer(port: number = DEFAULT_PORT): void {
 
         state.handleHook(payload);
         sendJson(res, { ok: true });
+      } catch {
+        sendJson(res, { error: "Invalid JSON" }, 400);
+      }
+      return;
+    }
+
+    // Notify endpoint - Claude signals waiting for review
+    if (req.method === "POST" && url.pathname === "/notify") {
+      try {
+        const body = await parseBody(req);
+        const { session_id, type } = JSON.parse(body);
+
+        if (!session_id) {
+          sendJson(res, { error: "session_id required" }, 400);
+          return;
+        }
+
+        if (type === "review") {
+          const success = state.notifyReview(session_id);
+          sendJson(res, { ok: true, success });
+        } else {
+          sendJson(res, { error: "Unknown notify type" }, 400);
+        }
       } catch {
         sendJson(res, { error: "Invalid JSON" }, 400);
       }
