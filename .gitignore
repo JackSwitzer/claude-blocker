@@ -30,3 +30,6 @@ coverage/
 
 # Misc
 *.local
+# Xcode user data
+xcuserdata/
+*.xcuserstate

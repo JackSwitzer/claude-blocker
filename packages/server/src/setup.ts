@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
-import { DEFAULT_PORT } from "@claude-blocker/shared";
+import { DEFAULT_PORT } from "./types.js";
 
 interface ClaudeSettings {
   hooks?: Record<string, unknown[]>;

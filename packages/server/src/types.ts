@@ -24,25 +24,26 @@ export interface Session {
 
 // WebSocket messages from server to extension
 export type ServerMessage =
-  | {
-      type: "state";
-      blocked: boolean;
-      sessions: number;
-      working: number;
-      waitingForInput: number;
-    }
+  | { type: "state"; blocked: boolean; sessions: number; working: number; waitingForInput: number }
   | { type: "pong" };
-
-// Tools that indicate Claude is waiting for user input
-export const USER_INPUT_TOOLS = [
-  "AskUserQuestion",
-  "ask_user",
-  "ask_human",
-];
 
 // WebSocket messages from extension to server
 export type ClientMessage = { type: "ping" } | { type: "subscribe" };
 
+// Extension storage schema
+export interface ExtensionState {
+  blockedDomains: string[];
+  lastBypassDate: string | null; // ISO date string, e.g. "2025-01-15"
+  bypassUntil: number | null; // timestamp when current bypass expires
+}
+
+// Default blocked domains
+export const DEFAULT_BLOCKED_DOMAINS = ["x.com", "twitter.com"];
+
 // Server configuration
 export const DEFAULT_PORT = 8765;
 export const SESSION_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+export const KEEPALIVE_INTERVAL_MS = 20 * 1000; // 20 seconds
+
+// Tools that indicate Claude is waiting for user input
+export const USER_INPUT_TOOLS = ["AskUserQuestion"];

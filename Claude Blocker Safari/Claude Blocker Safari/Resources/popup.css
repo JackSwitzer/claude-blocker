@@ -1,0 +1,148 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  background: #000;
+  color: #fff;
+  width: 200px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  padding: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #333;
+}
+
+.status-dot.connected {
+  background: #30d158;
+  box-shadow: 0 0 8px rgba(48, 209, 88, 0.6);
+}
+
+.status-dot.disconnected {
+  background: #ff453a;
+  box-shadow: 0 0 8px rgba(255, 69, 58, 0.6);
+}
+
+.status-dot.working {
+  background: #ffd60a;
+  box-shadow: 0 0 8px rgba(255, 214, 10, 0.6);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.status-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #999;
+}
+
+.block-badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.block-badge.blocked {
+  background: rgba(255, 69, 58, 0.15);
+  color: #ff453a;
+}
+
+.block-badge.open {
+  background: rgba(48, 209, 88, 0.15);
+  color: #30d158;
+}
+
+.block-badge.bypass {
+  background: rgba(255, 214, 10, 0.15);
+  color: #ffd60a;
+}
+
+.stats {
+  display: flex;
+  gap: 1px;
+  background: #1c1c1e;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 8px;
+  background: #1c1c1e;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  font-feature-settings: "tnum";
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.settings-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 12px;
+  background: #1c1c1e;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.settings-btn:hover {
+  background: #2c2c2e;
+}
+
+.settings-btn svg {
+  opacity: 0.4;
+}
