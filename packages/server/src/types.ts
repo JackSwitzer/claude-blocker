@@ -19,6 +19,7 @@ export interface Session {
   status: "idle" | "working" | "waiting_for_input" | "waiting_for_review";
   lastActivity: Date;
   cwd?: string;
+  userInteracted?: boolean; // True after first UserPromptSubmit
 }
 
 // Session data sent to clients (serializable)

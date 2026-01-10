@@ -77,8 +77,9 @@ class SessionState {
         const promptSession = this.sessions.get(session_id)!;
         // User submitted prompt → Claude is about to work
         promptSession.status = "working";
+        promptSession.userInteracted = true; // Mark that user has actually typed
         promptSession.lastActivity = new Date();
-        console.log(`[${session_id.slice(0,8)}] UserPromptSubmit → working`);
+        console.log(`[${session_id.slice(0,8)}] UserPromptSubmit → working (userInteracted=true)`);
         break;
 
       case "PreToolUse":
@@ -86,8 +87,8 @@ class SessionState {
         const toolSession = this.sessions.get(session_id)!;
         const isUserInputTool = payload.tool_name && USER_INPUT_TOOLS.includes(payload.tool_name);
 
-        // User input tools (questions) always take priority
-        if (isUserInputTool) {
+        // User input tools (questions) always take priority - but only if user has interacted
+        if (isUserInputTool && toolSession.userInteracted) {
           toolSession.status = "waiting_for_input";
           console.log(`[${session_id.slice(0,8)}] PreToolUse(${payload.tool_name}) → waiting_for_input`);
         }
@@ -95,10 +96,14 @@ class SessionState {
         else if (toolSession.status === "waiting_for_review") {
           console.log(`[${session_id.slice(0,8)}] PreToolUse(${payload.tool_name}) → keeping waiting_for_review`);
         }
-        // All other tools → working
-        else {
+        // Only set working if user has actually interacted (submitted a prompt)
+        else if (toolSession.userInteracted) {
           toolSession.status = "working";
           console.log(`[${session_id.slice(0,8)}] PreToolUse(${payload.tool_name}) → working`);
+        }
+        // User hasn't typed yet - keep idle (don't unblock for auto-resume)
+        else {
+          console.log(`[${session_id.slice(0,8)}] PreToolUse(${payload.tool_name}) → ignoring (no user interaction yet)`);
         }
         toolSession.lastActivity = new Date();
         break;
